@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mid Web Lanjut</title>
+  <style>
+    body {
+   font-family: 'Arial', sans-serif;
+   background-color: #f8f9fa;
+   margin: 10px;
+   padding: 0;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+  }
+
+  h1 {
+   color: #343a40;
+   margin-top: 0;
+  }
+
+  input {
+   padding: 10px;
+   margin: 10px 0;
+   border: 1px solid #007bff;
+   border-radius: 4px;
+   width: calc(100% - 22px);
+   box-sizing: border-box;
+  }
+
+  button {
+   padding: 10px 20px;
+   margin: 10px 0;
+   cursor: pointer;
+   border: none;
+   border-radius: 4px;
+   font-size: 16px;
+   transition: background-color 0.3s;
+   box-sizing: border-box;
+  }
+
+  button.tambah {
+   background-color: #030303;
+   color: #ffffff;
+   width: calc(100% - 22px);
+  }
+
+  button.edit {
+   background-color: #e90716;
+   color: #fff;
+  }
+
+  button.hapus {
+   background-color: #3559dc;
+   color: #fff;
+  }
+
+  table {
+   width: 100%;
+   border-collapse: collapse;
+   margin-top: 20px;
+  }
+
+  th, td {
+   border: 1px solid #ddd;
+   padding: 10px;
+   text-align: left;
+  }
+
+  th {
+   background-color: #007bff;
+   color: #fff;
+  }
+
+  td button {
+   margin-right: 5px;
+  }
+
+  p {
+   font-weight: bold;
+   font-size: 18px;
+   color: #333;
+   margin-bottom: 0;
+  }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <label for="jurusan">Jurusan:</label>
+    <input type="text" id="jurusan">
+    <label for="peminat">Peminat:</label>
+    <input type="text" id="peminat">
+    <button id="tambah">Tambah</button>
+    <table id="tabelPeminat">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Jurusan</th>
+          <th>Peminat</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <p>Rata-rata Peminat: <span id="rataRata"></span></p>
+  </div>
+
+  <script>
+    class InputJurusan {
+      constructor() {
+        this.data = [];
+        this.selectedEditIndex = null;
+        this.initDOMElements();
+        this.initEventListeners();
+        this.render();
+      }
+
+      initDOMElements() {
+        this.jurusanInput = document.getElementById("jurusan");
+        this.peminatInput = document.getElementById("peminat");
+        this.tambahButton = document.getElementById("tambah");
+        this.tabelPeminat = document.querySelector("#tabelPeminat tbody");
+        this.rataRataP = document.getElementById("rataRata");
+      }
+
+      initEventListeners() {
+        this.tambahButton.addEventListener("click", this.handleTambahClick.bind(this));
+        this.tabelPeminat.addEventListener("click", this.handleTabelClick.bind(this));
+      }
+
+      handleInputChange() {
+        this.jurusan = this.jurusanInput.value;
+        this.peminat = this.peminatInput.value;
+      }
+
+      handleTambahClick() {
+        this.handleInputChange();
+        if (this.jurusan && this.peminat) {
+          if (this.selectedEditIndex !== null) {
+            this.data[this.selectedEditIndex] = { jurusan: this.jurusan, peminat: this.peminat };
+          } else {
+            this.data.push({ jurusan: this.jurusan, peminat: this.peminat });
+          }
+          this.clearInputs();
+          this.render();
+        }
+      }
+
+      handleEditClick(index) {
+        const selectedData = this.data[index];
+        this.jurusanInput.value = selectedData.jurusan;
+        this.peminatInput.value = selectedData.peminat;
+        this.selectedEditIndex = index;
+      }
+
+      handleHapusClick(index) {
+        this.data.splice(index, 1);
+        this.selectedEditIndex = null;
+        this.clearInputs();
+        this.render();
+      }
+
+      clearInputs() {
+        this.jurusanInput.value = "";
+        this.peminatInput.value = "";
+      }
+
+      hitungRataRata() {
+        const totalPeminat = this.data.reduce((acc, item) => acc + parseInt(item.peminat), 0);
+        return totalPeminat / this.data.length || 0;
+      }
+
+      render() {
+        this.tabelPeminat.innerHTML = "";
+        this.data.forEach((item, index) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${item.jurusan}</td>
+            <td>${item.peminat}</td>
+            <td>
+              <button class="edit" data-index="${index}">Edit</button>
+              <button class="hapus" data-index="${index}">Hapus</button>
+            </td>
+          `;
+          this.tabelPeminat.appendChild(row);
+        });
+
+        const rataRata = this.hitungRataRata();
+        this.rataRataP.textContent = rataRata.toFixed(2);
+      }
+
+      handleTabelClick(event) {
+        if (event.target.classList.contains("edit")) {
+          const index = parseInt(event.target.dataset.index);
+          this.handleEditClick(index);
+        } else if (event.target.classList.contains("hapus")) {
+          const index = parseInt(event.target.dataset.index);
+          this.handleHapusClick(index);
+        }
+      }
+    }
+
+    const inputJurusan = new InputJurusan();
+  </script>
+</body>
+</html>
